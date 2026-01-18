@@ -2,7 +2,6 @@
 
 A full‑stack application that evaluates the credibility of news articles using AI. This repository contains both frontend and backend code, along with setup and change logs to run and extend the project locally or deploy it.
 
-View the app in AI Studio: https://ai.studio/apps/temp/1
 
 ---
 
