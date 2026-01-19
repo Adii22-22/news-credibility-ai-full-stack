@@ -6,8 +6,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# CHANGED: Default to 'gemini-2.5-flash' (Free tier eligible & fast)
-# 'gemini-2.5-pro' often requires a billed account or has stricter limits.
+
 GEMINI_MODEL_NAME = os.getenv("GEMINI_MODEL_NAME", "gemini-2.5-flash")
 
 def _get_gemini_client() -> genai.Client:
@@ -38,6 +37,12 @@ def analyze_credibility(article_text: str, external_evidence: str) -> Dict[str, 
 
 TASK: Analyze the following news content for credibility, factual accuracy, bias, and provide a comprehensive analysis.
 
+IMPORTANT:
+If the input claim is incorrect or misleading, explicitly state that it is false
+and provide the correct verified information in the summary.
+Do not only summarize — correct the misinformation.
+
+
 --- INPUT TEXT / CLAIM ---
 {article_snippet}
 
@@ -60,15 +65,20 @@ TASK: Analyze the following news content for credibility, factual accuracy, bias
    - Selective presentation of facts
    - Emotional manipulation techniques
 
-4. ANALYSIS SUMMARY: Provide a 2-3 sentence analysis covering:
-   - Key claims and their verification status
-   - Cross-referencing with trusted sources
-   - Any detected bias or manipulation
-   - Overall credibility assessment
+4. ANALYSIS SUMMARY:
+Provide a 2–3 sentence analysis.
+If the claim is false or misleading, clearly state the correction with verified facts.
+
 
 5. TAGS: Identify 3 relevant topic categories (e.g., Technology, Finance, Politics, Science, Health, Sports, Entertainment)
 
 6. CROSS-REFERENCES: Extract up to 3 trusted sources mentioned in the evidence with their reliability indicators.
+
+7. MULTILINGUAL OUTPUT:
+   Provide the same summary translated into:
+   - Hindi
+   - Marathi
+
 
 Be thorough, objective, and base your assessment on the evidence provided."""
 
@@ -100,6 +110,14 @@ Be thorough, objective, and base your assessment on the evidence provided."""
                 "type": "string",
                 "description": "A 2-3 sentence comprehensive analysis of credibility, factual accuracy, bias, and key findings"
             },
+            "summary_hi": {
+                "type": "string",
+                "description": "Hindi translation of the summary"
+            },
+            "summary_mr": {
+                "type": "string",
+                "description": "Marathi translation of the summary"
+            },
             "tags": {
                 "type": "array",
                 "items": {"type": "string"},
@@ -112,19 +130,16 @@ Be thorough, objective, and base your assessment on the evidence provided."""
                 "items": {
                     "type": "object",
                     "properties": {
-                        "source": {"type": "string", "description": "Source name"},
-                        "sourceInitials": {"type": "string", "description": "2-character initials"},
-                        "timeAgo": {"type": "string", "description": "Time reference like '2 hours ago'"},
+                        "source": {"type": "string"},
+                        "sourceInitials": {"type": "string"},
+                        "timeAgo": {"type": "string"},
                         "trustColor": {
                             "type": "string",
-                            "enum": ["primary", "yellow", "red", "gray"],
-                            "description": "Trust indicator color"
+                            "enum": ["primary", "yellow", "red", "gray"]
                         }
-                    },
-                    "required": ["source", "sourceInitials", "timeAgo", "trustColor"]
+                    }
                 },
-                "maxItems": 3,
-                "description": "Up to 3 trusted source references"
+                "maxItems": 3
             }
         },
         "required": ["trustScore", "factualAccuracy", "biasRating", "headline", "summary", "tags", "crossReferences"]
@@ -185,6 +200,9 @@ Do not include any text before or after the JSON."""
         cleaned_text = cleaned_text.strip()
         
         result = json.loads(cleaned_text)
+        result.setdefault("summary_hi", result["summary"])
+        result.setdefault("summary_mr", result["summary"])
+
         
         # Ensure headline is set (use provided or extract from article)
         if not result.get("headline") or result["headline"].strip() == "":

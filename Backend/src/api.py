@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
-load_dotenv()  # <--- This must run before os.getenv("GEMINI_API_KEY")
+load_dotenv() 
 
 import os
 import sys
@@ -15,6 +15,8 @@ from services.scraper import scrape_article_text
 from services.search import get_verification_context
 from services.ai_agent import analyze_credibility
 from services.news_feed import fetch_top_news
+from services.ml_model import predict_credibility
+
 
 app = FastAPI(title="AI News Credibility Agent")
 
@@ -59,6 +61,9 @@ def analyze_news(req: AnalysisRequest):
 
         # Get structured analysis from AI
         analysis_result = analyze_credibility(article_text, evidence)
+        ml_score = predict_credibility(article_text)
+        analysis_result["mlScore"] = ml_score
+        analysis_result["trustScore"] = round(0.2 * ml_score + 0.8 * analysis_result["trustScore"], 2)
 
         return {
             "status": "success",

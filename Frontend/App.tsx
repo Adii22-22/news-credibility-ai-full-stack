@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import Navbar from "./src/components/Navbar";
 import HeroSection from "./src/components/HeroSection";
 import Dashboard from "./src/components/Dashboard";
@@ -6,7 +6,9 @@ import TrendingSection from "./src/components/TrendingSection";
 import { AnalysisResult } from "./types";
 import { analyzeContent } from "./src/services/apiService";
 
-const App: React.FC = () => {
+
+const App = () => {
+  const [language, setLanguage] = useState<"en" | "hi" | "mr">("en");
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(
     null
   );
@@ -44,7 +46,7 @@ const App: React.FC = () => {
 
   return (
     <>
-      <Navbar />
+      <Navbar setLanguage={setLanguage} />
       <main className="flex-1 w-full max-w-7xl mx-auto px-6 py-12 flex flex-col gap-12 mb-12">
         <HeroSection onAnalyze={handleAnalyze} isLoading={isLoading} />
 
@@ -68,7 +70,9 @@ const App: React.FC = () => {
           </div>
         )}
 
-        {analysisResult && !isLoading && <Dashboard data={analysisResult} />}
+        {analysisResult && !isLoading && (
+          <Dashboard data={analysisResult} language={language} />
+        )}
 
         <TrendingSection onCardClick={handleTrendingClick} />
       </main>

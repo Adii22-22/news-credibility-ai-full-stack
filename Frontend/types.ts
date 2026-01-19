@@ -7,13 +7,17 @@ export interface CrossReference {
   
   export interface AnalysisResult {
     trustScore: number;
+    mlScore: number;
     factualAccuracy: string;
     biasRating: string;
     headline: string;
     summary: string;
+    summary_hi: string;
+    summary_mr: string;
     tags: string[];
     crossReferences: CrossReference[];
   }
+
   
   export interface TrendingArticle {
     id: string;

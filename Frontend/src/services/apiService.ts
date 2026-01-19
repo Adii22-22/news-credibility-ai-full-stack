@@ -46,13 +46,17 @@ export const analyzeContent = async (text: string): Promise<AnalysisResult> => {
     // Return the structured data directly (already matches AnalysisResult)
     return {
       trustScore: data.trustScore,
+      mlScore: data.mlScore,
       factualAccuracy: data.factualAccuracy,
       biasRating: data.biasRating,
       headline: data.headline,
       summary: data.summary,
+      summary_hi: data.summary_hi,
+      summary_mr: data.summary_mr,
       tags: data.tags,
       crossReferences: data.crossReferences,
     };
+
   } catch (error) {
     console.error("Backend API Error:", error);
     throw error; // Re-throw to let the UI handle it properly
